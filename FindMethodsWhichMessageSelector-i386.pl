@@ -17,11 +17,25 @@ my %hClassRefs = ();
 print "\nSelector \"$szSelector\" implementation found at:\n";
 
 open(OTOOL, "xcrun otool -arch i386 -v -s __OBJC __message_refs $szLib|");
+
 while (<OTOOL>)
 {
 	chomp;
-
 	if ( m/^([\da-fA-F]{8})\s+__TEXT:__cstring:($szSelector)$/ )
+	{
+		$hClassRefs{hex($1)} = $2;
+		print "  $_";
+	}
+}
+
+close(OTOOL);
+
+open(OTOOL, "xcrun otool -arch i386 -v -s __DATA __objc_selrefs $szLib|");
+
+while (<OTOOL>)
+{
+	chomp;
+	if ( m/^([\da-fA-F]{8})\s+__TEXT:__objc_methname:($szSelector)$/ )
 	{
 		$hClassRefs{hex($1)} = $2;
 		print "  $_";
